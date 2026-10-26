@@ -20,7 +20,7 @@ concurrency:
 jobs:
   checar:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -28,10 +28,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Instalar navegador
-        run: |
-          pip install playwright
-          python -m playwright install --with-deps chromium
+      - name: Instalar Playwright
+        run: pip install playwright
 
       - name: Checar preço
         env:

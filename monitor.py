@@ -78,7 +78,8 @@ JS_CARD = """
 
 def checar_preco():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True,
+        # usa o Google Chrome que já vem instalado no servidor do GitHub
+        browser = p.chromium.launch(channel="chrome", headless=True,
                                     args=["--disable-blink-features=AutomationControlled"])
         ctx = browser.new_context(
             locale="pt-BR", timezone_id="America/Sao_Paulo",
