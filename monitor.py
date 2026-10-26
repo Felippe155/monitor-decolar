@@ -88,6 +88,7 @@ def checar_preco():
                         "(KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"),
         )
         page = ctx.new_page()
+        preco = None
         try:
             page.goto(URL, wait_until="domcontentloaded", timeout=120_000)
             page.wait_for_function("() => /R\\$\\s*\\d/.test(document.body.innerText)",
@@ -110,12 +111,28 @@ def checar_preco():
             else:
                 log(f"Hotel '{HOTEL}' não encontrado; usando a página inteira.")
                 texto = page.inner_text("body")
-            return extrair_preco_por_pessoa(texto) if texto else None
+            preco = extrair_preco_por_pessoa(texto) if texto else None
+            return preco
         except PWTimeout:
             log("Tempo esgotado carregando a página (lentidão ou bloqueio).")
             return None
         finally:
+            if preco is None:
+                salvar_diagnostico(page)
             browser.close()
+
+
+def salvar_diagnostico(page):
+    """Guarda print e texto da página quando a leitura falha."""
+    try:
+        d = PASTA / "debug"
+        d.mkdir(exist_ok=True)
+        (d / "url.txt").write_text(page.url, encoding="utf-8")
+        (d / "titulo.txt").write_text(page.title(), encoding="utf-8")
+        (d / "texto.txt").write_text(page.inner_text("body")[:8000], encoding="utf-8")
+        page.screenshot(path=str(d / "pagina.png"), full_page=False)
+    except Exception as e:
+        log(f"Falha ao salvar diagnóstico: {e}")
 
 
 def enviar_alerta(mensagem):
